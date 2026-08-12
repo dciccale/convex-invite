@@ -10,7 +10,6 @@ This repository is a Bun workspace managed with Turborepo and Biome.
 - [`apps/example`](./apps/example) — secure host integration with delivery and atomic membership creation.
 - [`apps/web`](./apps/web) — product site and documentation.
 - [`docs/delivery.md`](./docs/delivery.md) — delivery ownership, the example webhook contract, and an optional `@convex-dev/resend` integration.
-- [`convex-invite-v0.1-prd.md`](./convex-invite-v0.1-prd.md) — v0.1 product and security contract.
 
 ## Development
 

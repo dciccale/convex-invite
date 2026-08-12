@@ -210,5 +210,3 @@ bun run verify:package
 When changing component functions with a configured development deployment, run
 `bun run --cwd packages/convex-invite build:codegen` and commit the generated
 changes.
-
-The implementation follows the [v0.1 PRD](../../convex-invite-v0.1-prd.md).
