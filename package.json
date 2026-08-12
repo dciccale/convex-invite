@@ -1,0 +1,38 @@
+{
+  "name": "convex-invite",
+  "version": "0.0.0",
+  "description": "Reserved package for a secure Convex invitation component.",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dciccale/convex-invite.git"
+  },
+  "homepage": "https://github.com/dciccale/convex-invite#readme",
+  "bugs": {
+    "url": "https://github.com/dciccale/convex-invite/issues"
+  },
+  "keywords": [
+    "convex",
+    "convex-component",
+    "invitations"
+  ],
+  "author": "Denis Ciccale",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "check": "node --input-type=module -e \"import('./index.js').then(({ packageStatus }) => { if (packageStatus !== 'placeholder') process.exit(1) })\"",
+    "pack:check": "npm pack --dry-run"
+  }
+}
