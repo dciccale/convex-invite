@@ -1,0 +1,11 @@
+.git
+.vercel
+.turbo
+node_modules
+**/.next
+**/.source
+**/.turbo
+**/dist
+**/node_modules
+**/out
+*.tgz

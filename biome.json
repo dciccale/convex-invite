@@ -9,6 +9,7 @@
       "!**/_generated",
       "!**/dist",
       "!**/.turbo",
+      "!**/.vercel",
       "!**/node_modules"
     ]
   },
