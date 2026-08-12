@@ -1,0 +1,25 @@
+{
+  "name": "@convex-invite/example",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "convex:dev": "convex dev",
+    "dev": "convex dev",
+    "lint": "biome check convex --files-ignore-unknown=true",
+    "test": "vitest run --passWithNoTests",
+    "typecheck": "tsc -p convex/tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "convex": "1.43.0",
+    "convex-invite": "workspace:*"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.7",
+    "@edge-runtime/vm": "5.0.0",
+    "@types/node": "24.13.3",
+    "convex-test": "0.0.55",
+    "typescript": "7.0.2",
+    "vite": "8.2.1",
+    "vitest": "4.1.10"
+  }
+}

@@ -1,0 +1,30 @@
+---
+title: Management and cleanup
+description: List, revoke, export, prune, and delete invitations safely by scope.
+icon: ListChecks
+---
+
+Management functions return safe invitation views and never expose raw tokens
+or token digests. Keep them behind host authorization checks that validate the
+requested scope.
+
+## Queries
+
+- `getById`
+- `listByResource`
+- `listByState`
+- `listPendingByAudience`
+- `exportByScope`
+
+All list operations use Convex pagination and cap pages at 100 rows.
+
+## Mutations
+
+- `revoke` terminates a pending invitation with a host reason.
+- `resend` rotates a pending invitation and returns a fresh raw token once.
+- `recordDeliveryAttempt` stores a bounded delivery summary.
+- `prune` expires overdue invitations and removes old terminal rows.
+- `deleteByScope` performs bounded application-driven erasure.
+
+Pruning and deletion process no more than 100 documents per call. Schedule
+repeated internal mutations when a scope contains more records.

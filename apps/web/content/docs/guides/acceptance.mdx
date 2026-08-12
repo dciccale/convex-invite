@@ -1,0 +1,36 @@
+---
+title: Acceptance UI
+description: Build a safe React invitation preview and acceptance flow.
+icon: UserCheck
+---
+
+Expose only safe host wrappers to React. The preview response should contain the
+minimum display fields and must omit audience references, private payloads,
+delivery errors, internal IDs, and token digests.
+
+```tsx
+function AcceptInvitation({ token }: { token: string }) {
+  const preview = useQuery(api.invites.preview, { token });
+  const accept = useMutation(api.invites.accept);
+
+  if (preview === undefined) return <p>Loading invitation…</p>;
+
+  return (
+    <button onClick={() => void accept({ token })}>
+      Accept invitation to {preview.resourceRef}
+    </button>
+  );
+}
+```
+
+The host mutation must derive the subject and verified normalized audience from
+the authenticated identity. Never accept a subject or verified email asserted
+by the browser.
+
+## Token-bearing page precautions
+
+- Set a strict `Referrer-Policy`.
+- Avoid analytics and other third-party requests before scrubbing the URL.
+- Replace the token-bearing history entry with `history.replaceState`.
+- Collapse public error distinctions when they could enable enumeration.
+- Rate-limit preview, accept, and decline wrappers.

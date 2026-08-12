@@ -1,0 +1,152 @@
+---
+title: Email delivery
+description: Inject an existing provider, use React Email, and record delivery results automatically.
+icon: Send
+---
+
+`convex-invite` does not depend on an email provider. The host injects a
+provider function through `withDelivery()`. The helper queues the message and
+records the safe result.
+
+`issue()` always works without delivery configuration. No send occurs unless
+the host creates a delivery helper and calls `deliver()`.
+
+## Inject an existing Resend client
+
+Install and mount `@convex-dev/resend` in the host application. The host can
+reuse the same client for all application emails.
+
+```ts title="convex/resend.ts"
+import {
+  Resend,
+  type EmailId,
+  type SendEmailOptions,
+} from "@convex-dev/resend";
+import { Invitations } from "convex-invite";
+import { components } from "./_generated/api";
+
+export const resend = new Resend(components.resend, {
+  testMode: process.env.RESEND_TEST_MODE === "true",
+});
+
+const invitations = new Invitations(components.invite);
+
+export const invitationDelivery = invitations.withDelivery<
+  SendEmailOptions,
+  EmailId
+>({
+  transport: "resend",
+  enqueue: (ctx, message) => resend.sendEmail(ctx, message),
+});
+```
+
+`convex-invite` does not import or create Resend. It receives only the injected
+`enqueue()` function.
+
+## Use a Resend dashboard template
+
+```ts
+await invitationDelivery.deliver(ctx, {
+  scope: args.scope,
+  invitationId: args.invitationId,
+  message: {
+    from: "Acme <invites@example.com>",
+    to: args.to,
+    subject: "You are invited to Acme",
+    template: {
+      id: "workspace-invitation",
+      variables: { inviteUrl },
+    },
+  },
+});
+```
+
+## Use React Email
+
+Keep the React Email component in the host application. Render it to HTML with
+the host email package:
+
+```tsx title="packages/emails/render.tsx"
+import { render } from "@react-email/render";
+import { ProjectInviteEmail } from "./emails/project-invite-email";
+
+export async function renderProjectInviteEmail(props: {
+  inviteUrl: string;
+  projectName: string;
+}) {
+  return await render(<ProjectInviteEmail {...props} />);
+}
+```
+
+React Email rendering uses the Node runtime. Render and deliver inside one host
+Node action:
+
+```ts title="convex/invitationDelivery.ts"
+"use node";
+
+import { renderProjectInviteEmail } from "@acme/emails";
+import { v } from "convex/values";
+import { internalAction } from "./_generated/server";
+import { invitationDelivery } from "./resend";
+
+export const sendProjectInvitation = internalAction({
+  args: {
+    scope: v.string(),
+    invitationId: v.string(),
+    token: v.string(),
+    to: v.string(),
+    projectName: v.string(),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const appOrigin = process.env.APP_ORIGIN;
+    if (!appOrigin) throw new Error("Missing APP_ORIGIN");
+    const inviteUrl = new URL(
+      `/invitations/${args.token}`,
+      appOrigin,
+    ).toString();
+    const html = await renderProjectInviteEmail({
+      inviteUrl,
+      projectName: args.projectName,
+    });
+
+    await invitationDelivery.deliver(ctx, {
+      scope: args.scope,
+      invitationId: args.invitationId,
+      message: {
+        from: "Acme <invites@example.com>",
+        to: args.to,
+        subject: `Invitation to ${args.projectName}`,
+        html,
+      },
+    });
+    return null;
+  },
+});
+```
+
+The renderer and `deliver()` are normal TypeScript calls in the same action.
+The helper adds no extra action. The HTML enters the Resend component when
+`sendEmail()` queues it for durable delivery.
+
+<Callout type="info" title="What deliver records">
+  `deliver()` records `queued` after `enqueue()` succeeds. It records `failed`
+  with `DELIVERY_ENQUEUE_FAILED` if `enqueue()` throws. It does not store or log
+  provider error text.
+</Callout>
+
+## Checked-in webhook adapter
+
+The repository example injects a generic HTTP transport instead of Resend. It
+posts `{ to, inviteUrl }` to `EMAIL_WEBHOOK_URL`. This shows that the same API
+works with any provider.
+
+## Later delivery events
+
+Queueing does not confirm inbox delivery. Configure the Resend webhook and
+`onEmailEvent` handler for sent, delivered, bounced, or failed feedback. Store
+the returned `EmailId` in a host-owned mapping to the invitation ID. Keep raw
+invitation tokens out of that mapping.
+
+See the [official Convex Resend documentation](https://github.com/get-convex/resend)
+for webhook and production setup.

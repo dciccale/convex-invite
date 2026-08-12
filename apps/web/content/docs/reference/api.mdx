@@ -1,0 +1,65 @@
+---
+title: Host client API
+description: Reference the convex-invite client methods, states, and stable error codes.
+icon: Braces
+---
+
+## Mutation methods
+
+These methods require `InvitationMutationContext`. An action context does not
+type-check. This prevents split acceptance and host grant transactions.
+
+- `issue`
+- `resolve`
+- `accept`
+- `setAcceptanceResult`
+- `decline`
+- `revoke`
+- `resend`
+- `recordDeliveryAttempt`
+- `prune`
+- `deleteByScope`
+
+## Query methods
+
+- `getEffectiveByToken`
+- `getById`
+- `listByResource`
+- `listByState`
+- `listPendingByAudience`
+- `exportByScope`
+
+## Delivery helper
+
+`withDelivery(adapter)` returns a provider-neutral delivery helper. The adapter
+defines a stable `transport` name and an `enqueue(ctx, message)` function.
+
+`delivery.deliver(ctx, input)` calls the injected provider. It returns either:
+
+```ts
+{ state: "queued", messageId }
+{ state: "failed" }
+```
+
+It also records the corresponding safe delivery attempt. The provider message
+type and message ID type remain fully generic.
+
+## States
+
+`pending`, `accepted`, `declined`, `expired`, and `revoked`.
+
+## Errors
+
+Component failures are `ConvexError` values whose data contains a stable
+`code`. Import `invitationErrorCodes` to map codes to host copy. Public wrappers
+should collapse distinctions where revealing them could enable enumeration.
+
+Common codes include:
+
+- `INVITATION_INVALID_TOKEN`
+- `INVITATION_EXPIRED`
+- `INVITATION_AUDIENCE_MISMATCH`
+- `INVITATION_ALREADY_ACCEPTED`
+- `INVITATION_NOT_RESENDABLE`
+- `INVITATION_SCOPE_MISMATCH`
+- `INVITATION_INVALID_TRANSITION`

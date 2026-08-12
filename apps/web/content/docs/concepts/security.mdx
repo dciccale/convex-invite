@@ -1,0 +1,58 @@
+---
+title: Security boundary
+description: Understand token storage, host authorization, audience checks, and atomic grants.
+icon: ShieldCheck
+---
+
+## Component responsibilities
+
+`convex-invite` generates cryptographically random tokens, persists only their
+versioned SHA-256 digests, enforces lifecycle transitions, compares audience
+references, and prevents replay or conflicting acceptance.
+
+Raw tokens are returned only by `issue` and `resend`. They never appear in
+management results, exports, delivery summaries, or component logs.
+
+## Host responsibilities
+
+Every host wrapper must:
+
+- authenticate the caller;
+- authorize the requested scope and resource;
+- normalize and verify audience ownership;
+- rate-limit token-bearing public endpoints;
+- send messages without logging tokens;
+- create the resulting membership or domain grant transactionally.
+
+<Callout type="warn" title="Bearer-token URLs are sensitive">
+  Avoid analytics and third-party requests on token-bearing pages. Use a strict
+  `Referrer-Policy` and scrub the token from browser history as soon as
+  practical.
+</Callout>
+
+## Atomic acceptance
+
+Acceptance and the resulting host grant belong in one top-level Convex
+mutation. If membership creation throws, Convex rolls back both writes. Do not
+accept in an action and create access later.
+
+```ts
+const grant = await invites.accept(ctx, {
+  token,
+  acceptedBy: identity.subject,
+  audienceRef: verifiedNormalizedEmail(identity),
+});
+
+const membershipId = await ctx.db.insert("memberships", {
+  subject: identity.subject,
+  resourceRef: grant.resourceRef,
+  role: grant.role,
+});
+
+await invites.setAcceptanceResult(ctx, {
+  scope: grant.scope,
+  invitationId: grant.invitationId,
+  acceptedBy: identity.subject,
+  result: { membershipId },
+});
+```

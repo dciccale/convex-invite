@@ -1,0 +1,48 @@
+---
+title: convex-invite
+description: Secure, single-use invitation lifecycles for Convex applications.
+icon: MailCheck
+---
+
+`convex-invite` is a reusable Convex component for issuing, accepting, declining,
+revoking, expiring, and resending invitations. It owns the token and lifecycle
+invariants while your application keeps authority over users and access.
+
+<Callout type="warn" title="Host-owned security boundary">
+  Authentication, authorization, audience verification, message delivery, and
+  membership or domain grants remain in host code. Never expose the component
+  functions directly to clients.
+</Callout>
+
+## What it provides
+
+- 256-bit bearer tokens with only versioned SHA-256 digests persisted
+- Single-use, audience-bound acceptance and decline
+- Race-safe issue, expiry, revoke, and resend transitions
+- Idempotent acceptance results for atomic host grants
+- Scope-safe management, export, delivery summaries, and bounded cleanup
+
+## Start here
+
+<Cards>
+  <Card
+    title="Install the component"
+    href="/docs/getting-started/installation"
+    description="Mount convex-invite and create an authenticated host client."
+  />
+  <Card
+    title="Study the complete example"
+    href="/docs/getting-started/example"
+    description="Follow issuance through delivery, preview, acceptance, and membership creation."
+  />
+  <Card
+    title="Choose email delivery"
+    href="/docs/guides/delivery"
+    description="Use the generic webhook or integrate the official Convex Resend component."
+  />
+  <Card
+    title="Review the security model"
+    href="/docs/concepts/security"
+    description="Understand token handling, audience binding, and transactional grants."
+  />
+</Cards>

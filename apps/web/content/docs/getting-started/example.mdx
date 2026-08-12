@@ -1,0 +1,58 @@
+---
+title: Complete host example
+description: Trace the checked-in backend example from issuance through delivery and membership creation.
+icon: Workflow
+---
+
+The repository includes a complete backend integration under `apps/example`.
+It deliberately leaves authentication policy and the actual email provider to
+the host application.
+
+## End-to-end flow
+
+1. `delivery.issue` authenticates a manager and normalizes the audience email.
+2. It calls the internal `invites.issueForDelivery` mutation.
+3. The component returns the raw token directly to the action.
+4. The action sends the message without returning the token to a browser or
+   placing it in scheduled-function arguments.
+5. `invites.preview` exposes only an allowlisted public projection.
+6. `invites.accept` verifies the signed-in user's email and accepts the token.
+7. The wrapper writes the membership and acceptance result in the same Convex
+   transaction.
+
+The example also includes authenticated wrappers for decline, revoke, resend,
+and pending-invitation management. Resend derives the recipient from the stored
+invitation, rotates the token, permanently invalidates the old link, and sends
+the replacement link from the same action.
+
+<Callout type="info" title="The example transport">
+  The checked-in example posts `{ to, inviteUrl }` to `EMAIL_WEBHOOK_URL`. It
+  does not contain an email provider. The webhook must render and send the
+  message; without it, the example records delivery as failed.
+</Callout>
+
+## Run the backend
+
+Configure a Convex project for `apps/example`, set the webhook URL, then start
+the deployment:
+
+```sh
+bunx convex env set EMAIL_WEBHOOK_URL https://mailer.example.com/invitations
+bun run dev:example
+```
+
+Replace the example manager claim, application URL, email normalization, and
+transport with your application's implementations.
+
+<Cards>
+  <Card
+    title="Browse the host wrappers"
+    href="https://github.com/dciccale/convex-invite/blob/main/apps/example/convex/invites.ts"
+    description="Issue, preview, accept, decline, revoke, resend, and list invitations."
+  />
+  <Card
+    title="Browse the transport"
+    href="https://github.com/dciccale/convex-invite/blob/main/apps/example/convex/delivery.ts"
+    description="See the generic webhook adapter and delivery bookkeeping."
+  />
+</Cards>

@@ -1,0 +1,35 @@
+---
+title: Invitation lifecycle
+description: Learn the invitation states, effective expiry, idempotency, and resend behavior.
+icon: RefreshCw
+---
+
+An invitation starts in `pending` and reaches exactly one terminal state:
+
+```text
+pending ── accept ──> accepted
+        ├─ decline ─> declined
+        ├─ timeout ─> expired
+        └─ revoke ──> revoked
+```
+
+Queries report an overdue pending invitation as effectively expired even before
+the cleanup job materializes the state change.
+
+## Acceptance idempotency
+
+The same verified subject can safely retry a completed acceptance and receive
+the stored host result. A different subject cannot claim that result.
+
+## Resend
+
+Resend is token rotation, not reuse. It revokes the existing pending invitation
+with `superseded_by_resend`, inserts a new pending row with a fresh digest and
+expiry, and returns the new raw token once. The old link never becomes valid
+again.
+
+## Retention
+
+`prune` materializes overdue expiry and removes old terminal records in bounded
+batches. `deleteByScope` supports bounded application-driven erasure. Neither
+operation exposes token digests.

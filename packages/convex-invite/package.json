@@ -1,0 +1,90 @@
+{
+  "name": "convex-invite",
+  "version": "0.1.0-rc.1",
+  "description": "Secure, reusable, single-use invitation lifecycles for Convex.",
+  "author": "Denis Ciccale",
+  "type": "module",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dciccale/convex-invite.git",
+    "directory": "packages/convex-invite"
+  },
+  "homepage": "https://github.com/dciccale/convex-invite#readme",
+  "bugs": {
+    "url": "https://github.com/dciccale/convex-invite/issues"
+  },
+  "keywords": [
+    "convex",
+    "convex-component",
+    "invitations",
+    "security"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.*",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js",
+      "default": "./dist/client/index.js"
+    },
+    "./test": "./src/test.ts",
+    "./_generated/component.js": {
+      "types": "./dist/component/_generated/component.d.ts"
+    },
+    "./_generated/component": {
+      "types": "./dist/component/_generated/component.d.ts"
+    },
+    "./convex.config.js": {
+      "types": "./dist/component/convex.config.d.ts",
+      "import": "./dist/component/convex.config.js",
+      "default": "./dist/component/convex.config.js"
+    },
+    "./convex.config": {
+      "types": "./dist/component/convex.config.d.ts",
+      "import": "./dist/component/convex.config.js",
+      "default": "./dist/component/convex.config.js"
+    }
+  },
+  "types": "./dist/client/index.d.ts",
+  "module": "./dist/client/index.js",
+  "publishConfig": {
+    "access": "public",
+    "tag": "next"
+  },
+  "scripts": {
+    "build": "bun run clean && tsc -p tsconfig.build.json",
+    "clean": "node scripts/clean.mjs",
+    "codegen": "cd ../../apps/example && convex codegen --component-dir ../../packages/convex-invite/src/component",
+    "build:codegen": "bun run codegen && bun run build",
+    "dev": "tsc -p tsconfig.build.json --watch --preserveWatchOutput",
+    "lint": "biome check src --files-ignore-unknown=true",
+    "prepack": "bun run build",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pack:check": "npm pack --dry-run"
+  },
+  "peerDependencies": {
+    "convex": ">=1.43.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.7",
+    "@edge-runtime/vm": "5.0.0",
+    "@types/node": "24.13.3",
+    "convex": "1.43.0",
+    "convex-test": "0.0.55",
+    "typescript": "7.0.2",
+    "vite": "8.2.1",
+    "vitest": "4.1.10"
+  }
+}

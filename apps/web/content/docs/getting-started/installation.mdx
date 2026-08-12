@@ -1,0 +1,62 @@
+---
+title: Installation
+description: Install convex-invite, mount the component, and construct the host client.
+icon: PackagePlus
+---
+
+## Install
+
+From the host application workspace:
+
+```sh
+bun add convex-invite@next
+```
+
+The `next` tag contains the release candidate after publication. Use the
+workspace package while developing this repository.
+
+## Mount the component
+
+```ts title="convex/convex.config.ts"
+import { defineApp } from "convex/server";
+import invite from "convex-invite/convex.config.js";
+
+const app = defineApp();
+app.use(invite);
+export default app;
+```
+
+Run Convex code generation after mounting:
+
+```sh
+bunx convex dev
+```
+
+Multiple named mounts are isolated:
+
+```ts
+app.use(invite, { name: "customerInvites" });
+app.use(invite, { name: "staffInvites" });
+```
+
+## Create a host client
+
+```ts title="convex/invites.ts"
+import { Invitations } from "convex-invite";
+import { components } from "./_generated/api";
+
+const invites = new Invitations(components.invite, {
+  ttlMs: 7 * 24 * 60 * 60 * 1000,
+  terminalRetentionMs: 90 * 24 * 60 * 60 * 1000,
+});
+```
+
+The optional `roleParser`, `payloadParser`, and `acceptanceResultParser`
+callbacks can validate application values before they cross the component
+boundary. The component also enforces JSON depth, key-count, and size limits.
+
+## Next step
+
+Do not export component calls directly. Continue with the [complete host
+example](./example) to add authentication, delivery, and atomic membership
+creation.

@@ -2,7 +2,7 @@
 title: convex-invite v0.1 design proposal
 description: Product requirements and implementation plan for a secure, reusable Convex invitation component.
 date: 2026-08-12
-status: DRAFT
+status: RC HARDENING
 target_version: 0.1.0
 owner_repo: convex-invite
 working_package_name: convex-invite
@@ -538,38 +538,39 @@ implying official Convex ownership or upstream affiliation.
 9. V0.1 targets single-use invitations, not reusable invite links.
 10. The package ships backend primitives and examples, not a UI kit.
 
-## Open Questions Requiring Validation
+## Validated Public API Decisions
 
-1. Should accepted records default to 90-day retention or remain until explicit
-   host cleanup so idempotency has no surprising cutoff?
-2. Should v0.1 store only delivery summary fields or a bounded attempt table?
-3. Should acceptance result attachment be a second component call in the same
-   host mutation or part of a higher-order host helper?
-4. Can the public TypeScript surface discourage calling `accept` from an action,
-   beyond documentation and examples?
-5. Should `dedupeKey` be mandatory, or derived from scope/resource/audience when
-   audience exists?
-6. Should public preview support a separately validated public payload, or
-   should all preview projection remain entirely host-owned?
-7. Which minimum Convex version provides the required component transaction and
-   runtime crypto behavior across hosted and self-hosted deployments?
+The RC technical spike resolves the original open questions:
 
-Questions 1 through 4 require a technical spike before the public API is frozen.
+1. Terminal records default to 90-day retention. Hosts can configure this
+   value. Acceptance-result idempotency lasts while the terminal record exists.
+2. V0.1 stores one compact delivery summary. It does not store an attempt table
+   or provider message body.
+3. The host calls `accept`, writes its domain grant, and calls
+   `setAcceptanceResult` inside one top-level mutation. A higher-order helper
+   cannot safely model every host grant.
+4. Lifecycle write methods require `InvitationMutationContext`. This type
+   includes the mutation database context and rejects action contexts at compile
+   time. Delivery recording continues to support mutations and actions.
+5. `dedupeKey` remains mandatory. The host owns its domain-specific uniqueness
+   rule and must construct the key.
+6. Public preview projection remains host-owned. The component does not define a
+   second public payload.
+7. V0.1 requires Convex 1.43.0 or newer. The RC gate tests that minimum version.
 
-## Recommended Technical Spike
+## Completed Technical Spike
 
-Build a disposable host integration proving:
+Runtime and host integration tests prove:
 
-1. issue stores no plaintext token;
-2. email delivery receives the one-time token outside component storage;
-3. two simultaneous accepts create one host membership;
-4. a failed host grant rolls back accepted state;
+1. issue and resend store only token digests;
+2. delivery receives the raw token outside durable component storage;
+3. two concurrent accepts create one host membership;
+4. a failed host grant rolls component acceptance back;
 5. retry by the same subject returns the original membership reference;
-6. resend racing acceptance yields one winner and the losing token stays invalid;
-7. management lists never contain token material; and
-8. expiry behaves correctly before and after the scheduled sweep.
-
-Delete or rewrite the spike after its decisions are captured.
+6. accept races with resend, revoke, and decline produce one terminal winner;
+7. management reads and exports contain no token material;
+8. expiry is effective before a sweep and materialized by resolve or prune; and
+9. separate named component mounts do not share invitation data.
 
 ## Sources
 

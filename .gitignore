@@ -1,3 +1,11 @@
 node_modules/
+**/dist/
+**/.next/
+**/.source/
+**/.turbo/
+**/out/
+*.tsbuildinfo
 *.tgz
 .DS_Store
+.env.local
+.convex/
