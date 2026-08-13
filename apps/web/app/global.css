@@ -296,12 +296,27 @@ body {
   border: 1px solid var(--line);
   border-radius: 10px;
   color: #7a847d;
+  opacity: 0.56;
+  transition:
+    border-color 0.35s ease,
+    background 0.35s ease,
+    color 0.35s ease,
+    box-shadow 0.35s ease,
+    opacity 0.35s ease;
 }
 .step.active {
   border-color: #91c6a5;
   background: #eff9f2;
   color: var(--green);
+  opacity: 1;
   animation: step-arrival 0.45s ease-out;
+}
+.step.loading {
+  border-color: #b8c4bb;
+  background: #f5f7f3;
+  color: var(--muted);
+  opacity: 1;
+  box-shadow: 0 7px 18px rgb(37 55 44 / 8%);
 }
 .step.accepted {
   overflow: hidden;
@@ -319,7 +334,7 @@ body {
   position: absolute;
   top: 11px;
   right: 11px;
-  color: #9aa49d;
+  color: inherit;
   animation: spinner-turn 0.9s linear infinite;
 }
 .step span {

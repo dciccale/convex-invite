@@ -14,7 +14,8 @@ import { type CSSProperties, useEffect, useState } from "react";
 const DOT_POSITIONS = [16.67, 50, 83.33];
 
 type LifecycleState = {
-  activeStep: number;
+  completedStep: number;
+  loadingStep: number;
   dotStep: number;
   travelDuration: number;
   accepted: boolean;
@@ -22,7 +23,8 @@ type LifecycleState = {
 };
 
 const initialState: LifecycleState = {
-  activeStep: 0,
+  completedStep: -1,
+  loadingStep: -1,
   dotStep: 0,
   travelDuration: 0,
   accepted: false,
@@ -44,15 +46,41 @@ export function InviteLifecycle() {
         () =>
           setLifecycle((current) => ({
             ...current,
-            dotStep: 1,
-            travelDuration: 1100,
+            loadingStep: 0,
             resetting: false,
           })),
-        700,
+        500,
       );
       schedule(
-        () => setLifecycle((current) => ({ ...current, activeStep: 1 })),
-        1800,
+        () =>
+          setLifecycle((current) => ({
+            ...current,
+            completedStep: 0,
+            loadingStep: -1,
+          })),
+        1250,
+      );
+      schedule(
+        () =>
+          setLifecycle((current) => ({
+            ...current,
+            dotStep: 1,
+            travelDuration: 1100,
+          })),
+        1750,
+      );
+      schedule(
+        () => setLifecycle((current) => ({ ...current, loadingStep: 1 })),
+        2450,
+      );
+      schedule(
+        () =>
+          setLifecycle((current) => ({
+            ...current,
+            completedStep: 1,
+            loadingStep: -1,
+          })),
+        3650,
       );
       schedule(
         () =>
@@ -61,20 +89,25 @@ export function InviteLifecycle() {
             dotStep: 2,
             travelDuration: 1900,
           })),
-        2450,
+        4150,
+      );
+      schedule(
+        () => setLifecycle((current) => ({ ...current, loadingStep: 2 })),
+        5650,
       );
       schedule(
         () =>
           setLifecycle((current) => ({
             ...current,
-            activeStep: 2,
+            completedStep: 2,
+            loadingStep: -1,
             accepted: true,
           })),
-        4350,
+        6850,
       );
-      schedule(() => setLifecycle({ ...initialState, resetting: true }), 6800);
+      schedule(() => setLifecycle({ ...initialState, resetting: true }), 9000);
 
-      schedule(runCycle, 7200);
+      schedule(runCycle, 9400);
     };
 
     runCycle();
@@ -123,7 +156,7 @@ export function InviteLifecycle() {
       <div className="flow-line" aria-hidden="true">
         {DOT_POSITIONS.map((position, index) => (
           <span
-            className={`flow-node${index <= lifecycle.activeStep ? " active" : ""}`}
+            className={`flow-node${index <= lifecycle.completedStep ? " active" : ""}`}
             style={{ left: `${position}%` }}
             key={position}
           />
@@ -134,13 +167,20 @@ export function InviteLifecycle() {
         />
       </div>
       <div className="lifecycle-steps">
-        <div className={`step${lifecycle.activeStep >= 0 ? " active" : ""}`}>
+        <div
+          className={`step${lifecycle.completedStep >= 0 ? " active" : ""}${lifecycle.loadingStep === 0 ? " loading" : ""}`}
+        >
+          {lifecycle.completedStep < 0 && (
+            <LoaderCircle className="step-spinner" size={15} />
+          )}
           <Mail size={17} />
           <span>Issued</span>
-          <small>now</small>
+          <small>{lifecycle.completedStep >= 0 ? "now" : "pending"}</small>
         </div>
-        <div className={`step${lifecycle.activeStep >= 1 ? " active" : ""}`}>
-          {lifecycle.activeStep < 1 && (
+        <div
+          className={`step${lifecycle.completedStep >= 1 ? " active" : ""}${lifecycle.loadingStep === 1 ? " loading" : ""}`}
+        >
+          {lifecycle.completedStep < 1 && (
             <LoaderCircle className="step-spinner" size={15} />
           )}
           <ShieldCheck size={17} />
@@ -148,9 +188,9 @@ export function InviteLifecycle() {
           <small>audience</small>
         </div>
         <div
-          className={`step${lifecycle.activeStep >= 2 ? " active accepted" : ""}`}
+          className={`step${lifecycle.completedStep >= 2 ? " active accepted" : ""}${lifecycle.loadingStep === 2 ? " loading" : ""}`}
         >
-          {lifecycle.activeStep < 2 && (
+          {lifecycle.completedStep < 2 && (
             <LoaderCircle className="step-spinner" size={15} />
           )}
           {lifecycle.accepted ? (
