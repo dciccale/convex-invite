@@ -1,0 +1,37 @@
+{
+  "name": "convex-invite",
+  "version": "0.0.1",
+  "description": "Reserved package for the convex-invite Convex component.",
+  "type": "module",
+  "exports": {
+    ".": "./index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "LICENSE",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dciccale/convex-invite.git"
+  },
+  "homepage": "https://github.com/dciccale/convex-invite#readme",
+  "bugs": {
+    "url": "https://github.com/dciccale/convex-invite/issues"
+  },
+  "keywords": [
+    "convex",
+    "convex-component",
+    "invitations"
+  ],
+  "author": "Denis Ciccale",
+  "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public",
+    "tag": "latest"
+  }
+}
