@@ -2,12 +2,15 @@ import type {
   FunctionReference,
   GenericActionCtx,
   GenericDataModel,
+  GenericMutationCtx,
 } from "convex/server";
+import type { GenericId } from "convex/values";
 import { describe, expect, expectTypeOf, test, vi } from "vitest";
 import type { ComponentApi } from "../component/_generated/component.js";
 import {
   DEFAULT_DELIVERY_FAILURE_CODE,
   type InvitationDeliveryContext,
+  type InvitationMutationContext,
   Invitations,
 } from "./index.js";
 
@@ -16,8 +19,29 @@ const component = {
   invitations: { recordDeliveryAttempt },
 } as unknown as ComponentApi;
 
+type ConcreteHostDataModel = {
+  memberships: {
+    document: {
+      _id: GenericId<"memberships">;
+      _creationTime: number;
+      subject: string;
+    };
+    fieldPaths: "_id" | "_creationTime" | "subject";
+    indexes: {
+      by_id: ["_id"];
+      by_creation_time: ["_creationTime"];
+    };
+    searchIndexes: Record<never, never>;
+    vectorIndexes: Record<never, never>;
+  };
+};
+
 describe("injected invitation delivery", () => {
   test("requires a mutation context for lifecycle writes", () => {
+    expectTypeOf<InvitationMutationContext["db"]>().toEqualTypeOf<unknown>();
+    expectTypeOf<GenericMutationCtx<ConcreteHostDataModel>>().toMatchTypeOf<
+      Parameters<Invitations["accept"]>[0]
+    >();
     expectTypeOf<GenericActionCtx<GenericDataModel>>().not.toMatchTypeOf<
       Parameters<Invitations["accept"]>[0]
     >();

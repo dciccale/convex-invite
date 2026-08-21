@@ -141,13 +141,43 @@ export default app;
   );
   await writeFile(
     join(consumerDirectory, "smoke.ts"),
-    `import { Invitations, invitationErrorCodes } from "convex-invite";
+    `import type { GenericActionCtx, GenericDataModel, GenericMutationCtx } from "convex/server";
+import type { GenericId } from "convex/values";
+import { Invitations, invitationErrorCodes } from "convex-invite";
 import inviteTest from "convex-invite/test";
 import inviteConfig from "convex-invite/convex.config.js";
 import type { ComponentApi } from "convex-invite/_generated/component.js";
 
+type ConcreteHostDataModel = {
+  memberships: {
+    document: {
+      _id: GenericId<"memberships">;
+      _creationTime: number;
+      subject: string;
+    };
+    fieldPaths: "_id" | "_creationTime" | "subject";
+    indexes: {
+      by_id: ["_id"];
+      by_creation_time: ["_creationTime"];
+    };
+    searchIndexes: Record<never, never>;
+    vectorIndexes: Record<never, never>;
+  };
+};
+
 const component = null as unknown as ComponentApi;
 const invitations = new Invitations(component);
+declare const mutationCtx: GenericMutationCtx<ConcreteHostDataModel>;
+declare const actionCtx: GenericActionCtx<GenericDataModel>;
+void invitations.accept(mutationCtx, {
+  token: "token",
+  acceptedBy: "subject",
+});
+// @ts-expect-error Lifecycle writes must remain inside a mutation.
+void invitations.accept(actionCtx, {
+  token: "token",
+  acceptedBy: "subject",
+});
 void invitations;
 void invitationErrorCodes.invalidToken;
 void inviteTest.register;

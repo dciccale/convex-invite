@@ -48,8 +48,11 @@ export const DEFAULT_TERMINAL_RETENTION_MS = 90 * DAY;
 type ReadCtx = Pick<GenericQueryCtx<GenericDataModel>, "runQuery">;
 export type InvitationMutationContext = Pick<
   GenericMutationCtx<GenericDataModel>,
-  "db" | "runMutation"
->;
+  "runMutation"
+> & {
+  /** Mutation-only marker. Lifecycle methods do not access the host database. */
+  readonly db: unknown;
+};
 export type InvitationDeliveryContext =
   | Pick<GenericMutationCtx<GenericDataModel>, "runMutation">
   | Pick<GenericActionCtx<GenericDataModel>, "runMutation">;

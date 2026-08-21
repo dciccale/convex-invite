@@ -8,7 +8,7 @@ expiry, delivery, management, export, and pruning operations. Authentication,
 authorization, transport, identifier verification, and application grants stay
 in your application.
 
-> `0.1.0-rc.1` is a release candidate. Install it through the npm `next` tag
+> `0.1.0-rc.2` is a release candidate. Install it through the npm `next` tag
 > after publication. The public API can still change before `0.1.0`.
 
 ## Install and mount
