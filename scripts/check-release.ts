@@ -10,11 +10,29 @@ const manifest = JSON.parse(
   ),
 ) as { publishConfig?: { tag?: string }; version: string };
 
-if (!/^\d+\.\d+\.\d+-rc\.\d+$/.test(manifest.version)) {
-  throw new Error("The RC version must match x.y.z-rc.n");
+const stableVersion = /^\d+\.\d+\.\d+$/;
+const releaseCandidateVersion = /^\d+\.\d+\.\d+-rc\.\d+$/;
+
+if (
+  !stableVersion.test(manifest.version) &&
+  !releaseCandidateVersion.test(manifest.version)
+) {
+  throw new Error("The version must match x.y.z or x.y.z-rc.n");
 }
-if (manifest.publishConfig?.tag !== "next") {
+
+if (
+  releaseCandidateVersion.test(manifest.version) &&
+  manifest.publishConfig?.tag !== "next"
+) {
   throw new Error("An RC must publish to the npm next tag");
+}
+
+if (
+  stableVersion.test(manifest.version) &&
+  manifest.publishConfig?.tag !== undefined &&
+  manifest.publishConfig.tag !== "latest"
+) {
+  throw new Error("A stable release must publish to the npm latest tag");
 }
 
 const status = execFileSync("git", ["status", "--porcelain"], {

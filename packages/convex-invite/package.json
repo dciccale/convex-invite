@@ -1,6 +1,6 @@
 {
   "name": "convex-invite",
-  "version": "0.1.0-rc.2",
+  "version": "0.1.0",
   "description": "Secure, reusable, single-use invitation lifecycles for Convex.",
   "author": "Denis Ciccale",
   "type": "module",
@@ -59,8 +59,7 @@
   "types": "./dist/client/index.d.ts",
   "module": "./dist/client/index.js",
   "publishConfig": {
-    "access": "public",
-    "tag": "next"
+    "access": "public"
   },
   "scripts": {
     "build": "bun run clean && tsc -p tsconfig.build.json",
