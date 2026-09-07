@@ -1,6 +1,6 @@
 {
   "name": "convex-invite",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Secure, reusable, single-use invitation lifecycles for Convex.",
   "author": "Denis Ciccale",
   "type": "module",
@@ -85,5 +85,8 @@
     "typescript": "7.0.2",
     "vite": "8.2.1",
     "vitest": "4.1.10"
+  },
+  "dependencies": {
+    "convex-helpers": "0.1.124"
   }
 }

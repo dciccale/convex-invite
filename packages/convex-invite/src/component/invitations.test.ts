@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+import type { FunctionReturnType } from "convex/server";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { api } from "./_generated/api.js";
 import { digestToken } from "./security.js";
@@ -469,4 +470,58 @@ describe("invitation lifecycle", () => {
     });
     expect(result).toEqual({ expired: 0, deleted: 1 });
   });
+});
+
+test("all management indexes paginate without gaps or cross-scope results", async () => {
+  const t = initConvexTest();
+  const expected = new Set<string>();
+  for (let i = 0; i < 7; i++) {
+    const issued = await t.mutation(api.invitations.issue, {
+      ...baseIssue,
+      dedupeKey: `page-${i}`,
+    });
+    expected.add(issued.invitationId);
+  }
+  await t.mutation(api.invitations.issue, {
+    ...baseIssue,
+    scope: "other-scope",
+  });
+  const readers = [
+    (cursor: string | null) =>
+      t.query(api.invitations.listByResource, {
+        scope: baseIssue.scope,
+        resourceRef: baseIssue.resourceRef,
+        state: "pending",
+        paginationOpts: { numItems: 2, cursor },
+      }),
+    (cursor: string | null) =>
+      t.query(api.invitations.listByState, {
+        scope: baseIssue.scope,
+        state: "pending",
+        paginationOpts: { numItems: 2, cursor },
+      }),
+    (cursor: string | null) =>
+      t.query(api.invitations.listPendingByAudience, {
+        scope: baseIssue.scope,
+        audienceRef: baseIssue.audienceRef,
+        paginationOpts: { numItems: 2, cursor },
+      }),
+  ];
+  for (const read of readers) {
+    let cursor: string | null = null;
+    const ids: string[] = [];
+    do {
+      const result: FunctionReturnType<typeof api.invitations.listByResource> =
+        await read(cursor);
+      expect(result.page.length).toBeLessThanOrEqual(2);
+      for (const invitation of result.page) {
+        ids.push(invitation._id);
+        expect(invitation.scope).toBe(baseIssue.scope);
+        expect(invitation).not.toHaveProperty("tokenDigest");
+      }
+      cursor = result.isDone ? null : result.continueCursor;
+    } while (cursor !== null);
+    expect(ids).toHaveLength(expected.size);
+    expect(new Set(ids)).toEqual(expected);
+  }
 });

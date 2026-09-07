@@ -38,3 +38,12 @@ Do not move a prerelease to npm `latest`.
 
 Do not release from a dirty working tree or with an unreviewed generated
 component API.
+
+
+## Publish a stable patch
+
+For a compatible correction to an existing stable version, increment the patch version in `packages/convex-invite/package.json` and update the root lockfile with the repository's pinned Bun version. Record the correction in `CHANGELOG.md`.
+
+Run `bun run release:check` from the clean release commit. Verify the packed component on a local backend. Merge the reviewed change into `main`, then publish from `packages/convex-invite` with `npm publish --tag latest --access public` using an authenticated maintainer session.
+
+Verify the published version, distribution tag, and archive integrity. Tag the exact source commit as `v<version>` and add GitHub release notes. Do not publish the same version again after a confirmed publication. Local publication does not attach CI provenance.
