@@ -1,11 +1,12 @@
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
+import { paginator } from "convex-helpers/server/pagination";
 import type { Doc, Id } from "./_generated/dataModel.js";
 import type { MutationCtx, QueryCtx } from "./_generated/server.js";
 import { mutation, query } from "./_generated/server.js";
 import { errorCodes, fail } from "./errors.js";
 import { toEffectiveView, toGrant, toView } from "./model.js";
-import { invitationState, revokedReason } from "./schema.js";
+import schema, { invitationState, revokedReason } from "./schema.js";
 import {
   assertDuration,
   assertJson,
@@ -401,7 +402,7 @@ export const listByResource = query({
     assertString(args.scope, { max: 256 });
     assertString(args.resourceRef, { max: 512 });
     assertLimit(args.paginationOpts.numItems);
-    const result = await ctx.db
+    const result = await paginator(ctx.db, schema)
       .query("invitations")
       .withIndex("by_scope_resource_state_created", (q) =>
         q
@@ -425,7 +426,7 @@ export const listByState = query({
   handler: async (ctx, args) => {
     assertString(args.scope, { max: 256 });
     assertLimit(args.paginationOpts.numItems);
-    const result = await ctx.db
+    const result = await paginator(ctx.db, schema)
       .query("invitations")
       .withIndex("by_scope_state_created", (q) =>
         q.eq("scope", args.scope).eq("state", args.state),
@@ -447,7 +448,7 @@ export const listPendingByAudience = query({
     assertString(args.scope, { max: 256 });
     assertString(args.audienceRef, { max: 512 });
     assertLimit(args.paginationOpts.numItems);
-    const result = await ctx.db
+    const result = await paginator(ctx.db, schema)
       .query("invitations")
       .withIndex("by_scope_audience_state_created", (q) =>
         q
