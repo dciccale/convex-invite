@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.1 - 2026-09-07
 
 - Fix all three paginated management queries inside Convex component mounts. Use `convex-helpers` pagination because Convex rejects native `.paginate()` inside components.
 - Test multi-page results and scope isolation for resource, state, and audience indexes.
